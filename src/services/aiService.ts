@@ -1,151 +1,73 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getModel } from "./aiConfig";
+import { UnifiedGrant } from "../utils/normalizeGrantData";
 
-const genAI = new GoogleGenerativeAI(
-  import.meta.env.VITE_GEMINI_API_KEY
-);
+export async function generateGrantReport(grant: UnifiedGrant): Promise<string> {
+  const model = getModel();
 
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-});
-
-export async function generateGrantReport(grant) {
-  const financeNotes =
-    grant.finance?.map((item) => item.finance_note).join("\n- ") ||
-    "No finance notes available.";
-
-  const budgetBreakdown =
+  const financeLines =
     grant.finance
-      ?.map(
-        (item) =>
-          `${item.budget_line}
-Approved: ${item.approved_budget_units}
-Monthly Used: ${item.monthly_utilized_units}
-Cumulative Used: ${item.cumulative_utilized_units}`
+      .map(
+        (f) =>
+          `• ${f.budget_line}: Approved ${Number(f.approved_budget_units).toLocaleString()} | ` +
+          `Cumulative Used ${Number(f.cumulative_utilized_units).toLocaleString()} | Note: ${f.finance_note}`
       )
-      .join("\n\n") || "No budget details available.";
+      .join("\n") || "No budget details available.";
 
-  const evidenceSummary =
+  const evidenceLines =
     grant.evidence
-      ?.map(
-        (item) =>
-          `Title: ${item.title}
-District: ${item.district}
-Caption: ${item.summary_or_caption}`
+      .map(
+        (e) =>
+          `• [${e.record_type}] ${e.title} — ${e.district}: ${e.summary_or_caption}`
       )
-      .join("\n\n") || "No evidence available.";
+      .join("\n") || "No evidence records available.";
 
-  const prompt = `
-You are a senior Monitoring & Evaluation (M&E) Officer preparing a donor-ready grant report.
+  const prompt = `You are a senior Monitoring & Evaluation officer preparing a donor-ready grant report.
 
-IMPORTANT RULES
-
-- Use ONLY the information provided below.
-- Do NOT invent facts or statistics.
-- If information is missing, explicitly state that it is unavailable.
-- Write in a professional NGO reporting style.
-- Use clear headings.
-- Be concise but informative.
+STRICT RULES:
+- Use ONLY the data provided below. Do not invent any figures, names, locations, or outcomes.
+- If a field is missing, write "Not available" — do not guess or extrapolate.
+- Write in professional NGO reporting style with clear section headings.
+- At the end, include a section titled "AI Sources Used" that lists every data field you referenced.
 
 =====================================================
-
 GRANT DETAILS
-
-Grant Name:
-${grant.name}
-
-Grant ID:
-${grant.id}
-
-Donor:
-${grant.donor}
-
-Reporting Month:
-${grant.month}
-
-=====================================================
+Name: ${grant.name}
+ID: ${grant.id}
+Donor: ${grant.donor}
+Reporting Month: ${grant.month}
+Report Status: ${grant.reportStatus}
 
 FINANCIAL SUMMARY
+Approved Budget: ${grant.budget.toLocaleString()}
+Utilized Budget: ${grant.utilized.toLocaleString()}
+Remaining Budget: ${grant.remaining.toLocaleString()}
+Utilization Rate: ${grant.utilizationRate.toFixed(2)}%
 
-Approved Budget:
-${grant.budget}
-
-Utilized Budget:
-${grant.utilized}
-
-Remaining Budget:
-${grant.remaining}
-
-Budget Utilization:
-${grant.utilizationRate.toFixed(2)}%
-
-Budget Breakdown
-
-${budgetBreakdown}
-
-Finance Notes
-
-${financeNotes}
-
-=====================================================
+Budget Lines:
+${financeLines}
 
 PROGRAM PERFORMANCE
+Schools Completed PBL: ${grant.schoolsCompleted}
+PBL Completion Rate: ${grant.completionRate.toFixed(2)}%
+Attendance Rate: ${grant.attendanceRate.toFixed(2)}%
+Risk Status: ${grant.riskStatus}
 
-Schools Completed
+Draft Report Text (if available):
+${grant.performance?.draft_report_text || "Not available"}
 
-${grant.schoolsCompleted}
-
-Attendance Rate
-
-${grant.attendanceRate.toFixed(2)}%
-
-Risk Status
-
-${grant.riskStatus}
-
-Report Status
-
-${grant.reportStatus}
-
-Existing Draft Report
-
-${grant.performance?.draft_report_text || "Not Available"}
-
+EVIDENCE (${grant.evidence.length} records):
+${evidenceLines}
 =====================================================
 
-EVIDENCE
-
-Total Evidence Submitted
-
-${grant.evidence.length}
-
-Evidence Details
-
-${evidenceSummary}
-
-=====================================================
-
-Prepare a donor-ready report with the following sections.
-
+Write the following sections:
 1. Executive Summary
-
 2. Financial Performance
-
 3. Program Performance
-
 4. Evidence Summary
-
 5. Risk Assessment
-
 6. Recommendations
-
-At the end add a section called
-
-"AI Sources Used"
-
-listing exactly which datasets were used.
-`;
+7. AI Sources Used`;
 
   const result = await model.generateContent(prompt);
-
   return result.response.text();
 }

@@ -6,9 +6,9 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
-
-import { getAttendanceTrend } from "../../utils/chartHelpers";
+import { getAttendanceTrend, getParticipationTrend } from "../../utils/chartHelpers";
 import { SchoolData } from "../../utils/normalizeData";
 
 interface Props {
@@ -16,29 +16,46 @@ interface Props {
 }
 
 export default function AttendanceChart({ data }: Props) {
-  const chartData = getAttendanceTrend(data);
+  const attendanceTrend = getAttendanceTrend(data);
+  const participationTrend = getParticipationTrend(data);
+
+  // Merge by month
+  const merged = attendanceTrend.map((a) => {
+    const p = participationTrend.find((pt) => pt.month === a.month);
+    return {
+      month: a.month,
+      "Attendance %": a.attendance,
+      "Participation %": p?.participation ?? 0,
+    };
+  });
 
   return (
     <div className="bg-white rounded-xl shadow p-5 h-[350px]">
-      <h2 className="text-xl font-semibold mb-4">
-        Attendance Trend
+      <h2 className="text-lg font-semibold mb-4 text-gray-800">
+        Monthly Trends — Attendance & Participation
       </h2>
-
-      <ResponsiveContainer width="100%" height="90%">
-        <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-
-          <XAxis dataKey="month" />
-
-          <YAxis />
-
-          <Tooltip />
-
+      <ResponsiveContainer width="100%" height="88%">
+        <LineChart data={merged}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+          <YAxis unit="%" domain={[0, 100]} tick={{ fontSize: 12 }} />
+          <Tooltip formatter={(v: number) => `${v.toFixed(1)}%`} />
+          <Legend />
           <Line
             type="monotone"
-            dataKey="attendance"
+            dataKey="Attendance %"
             stroke="#2563eb"
-            strokeWidth={3}
+            strokeWidth={2.5}
+            dot={{ r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="Participation %"
+            stroke="#16a34a"
+            strokeWidth={2.5}
+            dot={{ r: 4 }}
+            activeDot={{ r: 6 }}
           />
         </LineChart>
       </ResponsiveContainer>

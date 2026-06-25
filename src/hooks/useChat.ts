@@ -11,33 +11,27 @@ export default function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
-  async function send(
-    grant: UnifiedGrant,
-    question: string
-  ) {
-    if (!question.trim()) return;
+  async function send(grant: UnifiedGrant, question: string) {
+    const trimmed = question.trim();
+    if (!trimmed) return;
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "user",
-        text: question,
-      },
-    ]);
-
+    const userMsg: ChatMessage = { role: "user", text: trimmed };
+    setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
 
     try {
-      const answer = await askGrantAI(
-        grant,
-        question
-      );
-
+      const answer = await askGrantAI(grant, trimmed);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: answer },
+      ]);
+    } catch (err) {
+      console.error("[useChat] AI chat failed:", err);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          text: answer,
+          text: "Unable to reach AI. Please check your connection and API key.",
         },
       ]);
     } finally {
@@ -45,9 +39,5 @@ export default function useChat() {
     }
   }
 
-  return {
-    messages,
-    loading,
-    send,
-  };
+  return { messages, loading, send };
 }
