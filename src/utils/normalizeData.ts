@@ -16,14 +16,12 @@ export interface SchoolData {
   month: string;
 }
 
-/** Safely read a string column; returns "" on missing */
 const str = (row: PBLRecord, key: string): string => {
   const v = row[key];
   if (v === null || v === undefined) return "";
   return String(v).trim();
 };
 
-/** Safely read a numeric column; returns 0 on missing/NaN */
 const num = (row: PBLRecord, key: string): number => {
   const v = row[key];
   if (v === null || v === undefined || v === "") return 0;
@@ -34,8 +32,7 @@ const num = (row: PBLRecord, key: string): number => {
 export const normalizeData = (rows: PBLRecord[]): SchoolData[] => {
   return rows.map((row) => {
     const rawRate = num(row, "Derived: Overall PBL attendance rate");
-
-    // CSV may store 0–1 (decimal) or 0–100 (percentage); normalise to 0–100
+    // CSV stores 0–1 decimal (e.g. 0.7074) — convert to percentage
     const attendanceRate = rawRate > 1 ? rawRate : rawRate * 100;
 
     return {
@@ -43,12 +40,13 @@ export const normalizeData = (rows: PBLRecord[]): SchoolData[] => {
       schoolCode: str(row, "What is your school's synthetic school code?"),
       district: str(row, "What is the name of your district?"),
       block: str(row, "Block Details"),
-      grades: str(row, "Which grades participated?"),
-      subjects: str(row, "Which subjects were covered?"),
+      // ✅ FIXED: actual CSV column names
+      grades: str(row, "In which class/classes did you conduct the PBL project?"),
+      subjects: str(row, "Which subject do you teach?"),
       participated:
-        str(row, "Did your school participate in PBL this month?").toLowerCase() === "yes",
+        str(row, "Was the PBL project conducted in your school this month?").toLowerCase() === "yes",
       evidenceSubmitted:
-        str(row, "Was evidence submitted this month?").toLowerCase() === "yes",
+        str(row, "Was evidence submitted for the completed PBL project?").toLowerCase() === "yes",
       enrollment: num(row, "Derived: Total enrollment across Classes 6-8"),
       attendance: num(
         row,
