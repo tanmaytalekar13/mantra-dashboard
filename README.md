@@ -417,6 +417,6 @@ AI is optional. If `VITE_GEMINI_API_KEY` is missing or the Gemini call fails, de
 
 ## Author
 
-Author: `<your-name>`
+Author: `Tanmay Talekar`
 
 Assignment: Mantra4Change AI Prework Assignment
