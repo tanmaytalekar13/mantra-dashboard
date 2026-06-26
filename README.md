@@ -198,6 +198,19 @@ Because this is a frontend-only app, any `VITE_` variable is exposed to the brow
 
 ## Setup
 
+### Quick Start
+
+Run these commands in order on a fresh machine:
+
+```bash
+git clone <repository-url>
+cd mantra-dashboard
+npm install
+npm run dev
+```
+
+After `npm run dev`, open the local Vite URL shown in the terminal, usually `http://localhost:5173`.
+
 ### Prerequisites
 
 - Node.js 20 or newer is recommended.
@@ -219,8 +232,16 @@ cd mantra-dashboard
 
 ### 2. Install Dependencies
 
+Dependencies are not committed to the repository. Install them before running the app:
+
 ```bash
 npm install
+```
+
+If you want a clean, lockfile-based install, use:
+
+```bash
+npm ci
 ```
 
 ### 3. Configure Environment Variables
@@ -244,6 +265,8 @@ public/data/grant/images/
 ```
 
 ### 5. Start the Development Server
+
+Run this only after dependencies are installed:
 
 ```bash
 npm run dev
