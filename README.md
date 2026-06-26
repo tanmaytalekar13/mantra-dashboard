@@ -3,7 +3,6 @@
 ![React](https://img.shields.io/badge/React-19-blue)
 ![Vite](https://img.shields.io/badge/Vite-8-purple)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38bdf8)
-![License](https://img.shields.io/badge/License-MIT-green)
 
 ## Overview
 
@@ -197,22 +196,66 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 
 Because this is a frontend-only app, any `VITE_` variable is exposed to the browser bundle. Do not use this pattern for production secrets.
 
-## Installation
+## Setup
 
 ### Prerequisites
 
 - Node.js 20 or newer is recommended.
 - npm.
 
-### Setup
+Check your local versions:
+
+```bash
+node --version
+npm --version
+```
+
+### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
 cd mantra-dashboard
+```
+
+### 2. Install Dependencies
+
+```bash
 npm install
 ```
 
-No backend setup, database setup, or seed command is required.
+### 3. Configure Environment Variables
+
+AI features are optional. The dashboard, CSV analytics, deterministic grant report, and PDF export work without an API key.
+
+To enable Gemini AI report generation and grant chat, create a `.env` file in the project root:
+
+```bash
+VITE_GEMINI_API_KEY=your_gemini_api_key
+```
+
+### 4. Verify Data Files
+
+The app reads CSV and image files directly from `public/data`. Keep these files in place:
+
+```text
+public/data/pbl/
+public/data/grant/csv/
+public/data/grant/images/
+```
+
+### 5. Start the Development Server
+
+```bash
+npm run dev
+```
+
+Open the Vite URL shown in the terminal, usually:
+
+```text
+http://localhost:5173
+```
+
+No backend setup, database setup, migration, seed command, or API server is required.
 
 ## Running the Project
 
@@ -311,17 +354,6 @@ flowchart TD
 
 AI is optional. If `VITE_GEMINI_API_KEY` is missing or the Gemini call fails, deterministic grant reporting remains available.
 
-## Screenshots
-
-Suggested screenshot paths:
-
-```text
-screenshots/dashboard.png
-screenshots/grant-report.png
-screenshots/filters.png
-screenshots/ai-report.png
-```
-
 ## Production Readiness
 
 | Area | Current State |
@@ -349,7 +381,7 @@ screenshots/ai-report.png
 - Add a backend only if needed for AI key protection, uploads, authentication, persistence, or larger datasets.
 - Add CSV schema validation and clearer data-quality errors.
 - Add downloadable CSV/Excel exports for filtered dashboard results.
-- Add production deployment notes and screenshots.
+- Add production deployment notes.
 
 ## Assignment Coverage
 
@@ -359,10 +391,6 @@ screenshots/ai-report.png
 - Complete: PDF export.
 - Partial: AI-assisted reporting and grant chat, available only with a Gemini API key.
 - Not implemented: Backend, database, authentication, and automated tests.
-
-## License
-
-MIT
 
 ## Author
 
