@@ -388,16 +388,6 @@ AI is optional. If `VITE_GEMINI_API_KEY` is missing or the Gemini call fails, de
 | Security | No auth; Gemini key is client-side if configured |
 | Deployment | Suitable for static hosting after `npm run build` |
 
-## Limitations
-
-- No backend server.
-- No database.
-- No authentication or user roles.
-- No server-side protection for AI keys.
-- PBL risk status is consumed from CSV rather than recalculated.
-- No automated tests are currently implemented.
-- Some files use `.ts` / `.tsx`, but there is no dedicated TypeScript config in the repo.
-
 ## Future Improvements
 
 - Add tests for CSV normalization, filters, metrics, and report generation.
